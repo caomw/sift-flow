@@ -27,7 +27,7 @@ void CStochastic::ConvertInt2String(int x,char* string,int BitNumber)
 
 double CStochastic::UniformSampling()
 {
-	return (double)rand()/(RAND_MAX+1);
+	return (double)rand()/(RAND_MAX+1.0);
 }
 
 int CStochastic::UniformSampling(int R)
