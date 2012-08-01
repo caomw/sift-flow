@@ -1,0 +1,49 @@
+% function to demonstrate how to use SIFT flow to register images across scenes
+% For simplicity we use two satellite images from the Mars. These two images 
+
+im1=imread('Mars-1.jpg');
+im2=imread('Mars-2.jpg');
+
+im1=imresize(imfilter(im1,fspecial('gaussian',7,1.),'same','replicate'),0.5,'bicubic');
+im2=imresize(imfilter(im2,fspecial('gaussian',7,1.),'same','replicate'),0.5,'bicubic');
+
+im1=im2double(im1);
+im2=im2double(im2);
+
+%figure;imshow(im1);figure;imshow(im2);
+
+patchsize=8;
+gridspacing=1;
+
+Sift1=dense_sift(im1,patchsize,gridspacing);
+Sift2=dense_sift(im2,patchsize,gridspacing);
+
+% figure;imshow(showColorSIFT(Sift1));
+% figure;imshow(showColorSIFT(Sift2));
+
+SIFTflowpara.alpha=2;
+SIFTflowpara.d=40;
+SIFTflowpara.gamma=0.005;
+SIFTflowpara.nlevels=4;
+SIFTflowpara.wsize=5;
+SIFTflowpara.topwsize=20;
+SIFTflowpara.nIterations=60;
+
+tic;[vx,vy,energylist]=SIFTflowc2f(Sift1,Sift2,SIFTflowpara);toc
+
+Im1=im1(patchsize/2:end-patchsize/2+1,patchsize/2:end-patchsize/2+1,:);
+Im2=im2(patchsize/2:end-patchsize/2+1,patchsize/2:end-patchsize/2+1,:);
+warpI2=warpImage(Im2,vx,vy);
+figure;imshow(Im1);figure;imshow(warpI2);
+
+% display flow
+clear flow;
+flow(:,:,1)=vx;
+flow(:,:,2)=vy;
+figure;imshow(flowToColor(flow));
+
+return;
+
+% this is the code doing the brute force matching
+tic;[flow2,energylist2]=mexDiscreteFlow(Sift1,Sift2,[alpha,alpha*20,60,30]);toc
+figure;imshow(flowToColor(flow2));
