@@ -36,10 +36,22 @@ else
     alpha=0.01;
 end
 
+if isfield(SIFTflowpara,'alpha_mat')
+    alpha_mat = SIFTflowpara.alpha_mat;
+else
+    alpha_mat = alpha*ones(size(im1));
+end
+
 if isfield(SIFTflowpara,'d')
     d=SIFTflowpara.d;
 else
     d=alpha*20;
+end
+
+if isfield(SIFTflowpara, 'd_mat')
+    d_mat = SIFTflowpara.d_mat;
+else
+    d_mat = alpha_mat*20;
 end
 
 if isfield(SIFTflowpara,'gamma')
@@ -137,9 +149,9 @@ for i=nlevels:-1:1
     end
     
     if i==nlevels
-        [flow,foo]=mexDiscreteFlow(Im1,Im2,[alpha,d,gamma*2^(i-1),nTopIterations,2,topwsize],vx,vy,winSizeX,winSizeY);
+        [flow,foo]=mexDiscreteFlow(Im1,Im2,[0,0,gamma*2^(i-1),nTopIterations,2,topwsize],vx,vy,winSizeX,winSizeY,alpha_mat, d_mat);
     else
-        [flow,foo]=mexDiscreteFlow(Im1,Im2,[alpha,d,gamma*2^(i-1),nIterationArray(i),nlevels-i,wsize],vx,vy,winSizeX,winSizeY);
+        [flow,foo]=mexDiscreteFlow(Im1,Im2,[0,0,gamma*2^(i-1),nIterationArray(i),nlevels-i,wsize],vx,vy,winSizeX,winSizeY, alpha_mat, d_mat);
     end
     energylist(i).data=foo;
     vx=flow(:,:,1);
